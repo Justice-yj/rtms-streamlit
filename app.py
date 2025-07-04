@@ -4,9 +4,9 @@ from __future__ import annotations
 import streamlit as st
 from datetime import datetime
 
-from rtms_app.lawd import build_lawd_dict
-from rtms_app.api import fetch_rtms_range
-from rtms_app.agent import get_df_agent
+from lawd import build_lawd_dict
+from api import fetch_rtms_range
+from agent import get_df_agent
 
 ###############################################################################
 # 전역: LAWD 코드 딕셔너리 캐시
