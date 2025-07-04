@@ -9,7 +9,7 @@ import pandas as pd
 import requests
 from dateutil.relativedelta import relativedelta
 
-from .config import ENDPOINT, SERVICE_KEY
+from config import ENDPOINT, SERVICE_KEY
 
 ###############################################################################
 # 1. 단일 YYYYMM 데이터 요청
