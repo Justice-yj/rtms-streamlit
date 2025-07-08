@@ -34,6 +34,31 @@ class ApiDistrictCodeLoader:
         
         if path is None:
             raise FileNotFoundError(f"⚠️ ‘법정동코드…’ 파일을 프로젝트 루트 폴더({base_dir})에 넣어 주세요!")
+        print(f"DEBUG: Found file at: {path}")
+
+        ext = path.split(".")[-1].lower()
+        if ext in {"xlsx", "xls"}:
+            df = pd.read_excel(path, dtype=str)
+        else:
+            df = pd.read_csv(path, dtype=str, encoding="euc-kr")
+        print(f"DEBUG: DataFrame head:\n{df.head()}")
+
+        df.columns = [c.strip() for c in df.columns]
+        df = df.rename(columns={"법정동코드": "code", "법정동명": "name", "폐지여부": "status"})
+        print(f"DEBUG: Renamed columns and filtered:\n{df.head()}")
+
+        sgg = df[df["code"].str.endswith("00000") & df["status"].eq("존재")].copy()
+        print(f"DEBUG: SGG DataFrame head:\n{sgg.head()}")
+
+        parts = sgg["name"].str.split()
+        sgg["시도"] = parts.str[0]
+        sgg["시군구"] = parts.str[1].fillna(sgg["시도"])
+        print(f"DEBUG: Sido/Sigungu added:\n{sgg.head()}")
+
+        sgg["LAWD_CD"] = sgg["code"].str[:5]
+        print(f"DEBUG: LAWD_CD added:\n{sgg.head()}")
+
+        return sgg[["시도", "시군구", "LAWD_CD"]]
 
         ext = path.split(".")[-1].lower()
         if ext in {"xlsx", "xls"}:

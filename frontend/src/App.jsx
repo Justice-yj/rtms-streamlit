@@ -179,20 +179,40 @@ function App() {
 
   // 시/도 선택 시 시/군/구 업데이트
   useEffect(() => {
-    if (selectedCity && cities[selectedCity]) {
-      setDistricts(Object.keys(cities[selectedCity]).sort());
-      setSelectedDistrict(''); // 시/도 변경 시 시/군/구 초기화
-    }
-  }, [selectedCity, cities]);
+    const fetchDistricts = async () => {
+      if (selectedCity) {
+        try {
+          const response = await fetch(`https://rtms-streamlit.onrender.com/sgg-list/${selectedCity}`);
+          if (!response.ok) {
+            throw new Error('시/군/구 데이터를 불러오는데 실패했습니다.');
+          }
+          const data = await response.json();
+          setDistricts(data);
+          setSelectedDistrict(''); // 시/도 변경 시 시/군/구 초기화
+        } catch (err) {
+          console.error("시/군/구 로드 오류:", err);
+          setError("시/군/구 데이터를 불러오는데 실패했습니다.");
+        }
+      }
+    };
 
-  // 시/군/구 선택 시 법정동 코드 업데이트
+    fetchDistricts();
+  }, [selectedCity]);
+
+  // 시/군/구 선택 시 법정동 코드 업데이트 (이 부분은 백엔드에서 직접 코드를 가져오지 않으므로 변경 없음)
   useEffect(() => {
-    if (selectedCity && selectedDistrict && cities[selectedCity][selectedDistrict]) {
-      setLawdCd(cities[selectedCity][selectedDistrict]);
-    } else {
-      setLawdCd('');
-    }
-  }, [selectedCity, selectedDistrict, cities]);
+    // 백엔드에서 직접 법정동 코드를 가져오는 API가 없으므로,
+    // 여기서는 선택된 시/도와 시/군/구를 조합하여 법정동 코드를 유추하거나,
+    // 별도의 API 호출이 필요합니다.
+    // 현재는 `handleSearch`에서 `lawdCd`를 사용하므로, 이 값만 설정하면 됩니다.
+    // 실제 법정동 코드는 `handleSearch`에서 `get_district_code` API를 통해 가져와야 합니다.
+    // 여기서는 단순히 선택된 시/도와 시/군/구 조합으로 `lawdCd`를 설정합니다.
+    // 이 부분은 백엔드 API 설계에 따라 달라질 수 있습니다.
+    // 임시로 `selectedCity`와 `selectedDistrict`를 조합하여 `lawdCd`를 설정합니다.
+    // 실제 법정동 코드는 `get_district_code` API를 통해 가져와야 합니다.
+    // 이 부분은 `handleSearch` 함수에서 처리하도록 합니다.
+    setLawdCd(''); // 초기화
+  }, [selectedCity, selectedDistrict]);
 
   // OpenLayers 지도 초기화 및 마커 추가
   useEffect(() => {
@@ -271,15 +291,25 @@ function App() {
     setGeocodedTradeData([]);
     setForecastData(null);
 
-    if (!lawdCd || !startYM || !endYM) {
+    if (!selectedCity || !selectedDistrict || !startYM || !endYM) {
       setError("모든 필수 입력 필드를 채워주세요.");
       setLoading(false);
       return;
     }
 
     try {
+      // 법정동 코드 가져오기
+      const districtCodeResponse = await fetch(`https://rtms-streamlit.onrender.com/district-code/${selectedDistrict}`);
+      if (!districtCodeResponse.ok) {
+        const errorData = await districtCodeResponse.json();
+        throw new Error(errorData.detail || "법정동 코드를 가져오는데 실패했습니다.");
+      }
+      const districtCodeData = await districtCodeResponse.json();
+      const fetchedLawdCd = districtCodeData.district_code;
+      setLawdCd(fetchedLawdCd); // 상태 업데이트
+
       const [minArea, maxArea] = exclusiveAreaRange;
-      const tradeResponse = await fetch(`https://rtms-streamlit.onrender.com/trade-data?lawd_cd=${lawdCd}&start_ym=${startYM}&end_ym=${endYM}${aptName ? `&apt_name=${aptName}` : ''}&area_exclusive_min=${minArea}&area_exclusive_max=${maxArea}`);
+      const tradeResponse = await fetch(`https://rtms-streamlit.onrender.com/trade-data?lawd_cd=${fetchedLawdCd}&start_ym=${startYM}&end_ym=${endYM}${aptName ? `&apt_name=${aptName}` : ''}&min_area=${minArea}&max_area=${maxArea}`);
       if (!tradeResponse.ok) {
         const errorData = await tradeResponse.json();
         throw new Error(errorData.detail || "거래 데이터 조회 실패");

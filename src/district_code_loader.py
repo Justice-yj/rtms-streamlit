@@ -28,7 +28,7 @@ def load_lawd_table() -> pd.DataFrame:
     """
     # --- ① 파일 탐색 ---
     # 현재 스크립트 파일의 디렉토리를 기준으로 파일을 찾습니다.
-    base_dir = Path(__file__).parent
+    base_dir = Path(__file__).parent.parent
     path = None
     for fn in os.listdir(base_dir):
         ext = fn.split(".")[-1].lower()
@@ -37,6 +37,7 @@ def load_lawd_table() -> pd.DataFrame:
             break
     if path is None:
         raise FileNotFoundError("⚠️ ‘법정동코드…’ 파일을 앱 폴더에 넣어 주세요!")
+    print(f"DEBUG: Found file at: {path}")
 
     # --- ② 파일 읽기 ---
     # 파일 확장자에 따라 적절한 Pandas 함수로 데이터를 읽어옵니다.
@@ -44,23 +45,28 @@ def load_lawd_table() -> pd.DataFrame:
         df = pd.read_excel(path, dtype=str)
     else:
         df = pd.read_csv(path, dtype=str, encoding="euc-kr")
+    print(f"DEBUG: DataFrame head:\n{df.head()}")
 
     # --- ③ 데이터 정제 및 필터링 ---
     # 컬럼명의 불필요한 공백을 제거하고, 표준 컬럼명으로 변경합니다.
     df.columns = [c.strip() for c in df.columns]
     df = df.rename(columns={"법정동코드": "code", "법정동명": "name", "폐지여부": "status"})
+    print(f"DEBUG: Renamed columns and filtered:\n{df.head()}")
 
     # '존재'하는 법정동 중에서 시/군/구 단위(코드 마지막 5자리가 '00000')만 필터링합니다.
     sgg = df[df["code"].str.endswith("00000") & df["status"].eq("존재")].copy()
+    print(f"DEBUG: SGG DataFrame head:\n{sgg.head()}")
 
     # '법정동명'에서 '시도'와 '시군구'를 분리합니다.
     # (예: '서울특별시 종로구' -> '서울특별시', '종로구')
     parts = sgg["name"].str.split()
     sgg["시도"] = parts.str[0]
     sgg["시군구"] = parts.str[1].fillna(sgg["시도"]) # 세종특별자치시 등 단일 이름 처리
+    print(f"DEBUG: Sido/Sigungu added:\n{sgg.head()}")
 
     # API에서 사용할 5자리 법정동 코드를 추출합니다.
     sgg["LAWD_CD"] = sgg["code"].str[:5]
+    print(f"DEBUG: LAWD_CD added:\n{sgg.head()}")
 
     return sgg[["시도", "시군구", "LAWD_CD"]]
 

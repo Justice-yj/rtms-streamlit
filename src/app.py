@@ -37,6 +37,20 @@ def find_code_for_district(district_name: str) -> str | None:
 def read_root():
     return {"message": "Hello, FastAPI! 아파트 실거래가 프로젝트에 오신 것을 환영합니다."}
 
+@app.get("/sido-list")
+def get_sido_list_api() -> List[str]:
+    """
+    전체 시/도 목록을 반환합니다.
+    """
+    return list(LAWD_CODES.keys())
+
+@app.get("/sgg-list/{sido}")
+def get_sgg_list_api(sido: str) -> List[str]:
+    """
+    선택된 시/도에 해당하는 시/군/구 목록을 반환합니다.
+    """
+    return list(LAWD_CODES.get(sido, {}).keys())
+
 @app.get("/district-code/{district_name}")
 def get_district_code(district_name: str) -> Dict:
     """
