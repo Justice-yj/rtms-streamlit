@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -156,7 +156,7 @@ function App() {
   useEffect(() => {
     const fetchLawdCodes = async () => {
       try {
-        const response = await fetch('https://rtms-streamlit.onrender.com/lawd-codes');
+        const response = await fetch(`${API_URL}/lawd-codes`);
         if (!response.ok) {
           throw new Error('법정동 코드 데이터를 불러오는데 실패했습니다.');
         }
@@ -182,7 +182,7 @@ function App() {
     const fetchDistricts = async () => {
       if (selectedCity) {
         try {
-          const response = await fetch(`https://rtms-streamlit.onrender.com/sgg-list/${selectedCity}`);
+          const response = await fetch(`${API_URL}/sgg-list/${selectedCity}`);
           if (!response.ok) {
             throw new Error('시/군/구 데이터를 불러오는데 실패했습니다.');
           }
@@ -299,7 +299,7 @@ function App() {
 
     try {
       // 법정동 코드 가져오기
-      const districtCodeResponse = await fetch(`https://rtms-streamlit.onrender.com/district-code/${selectedDistrict}`);
+      const districtCodeResponse = await fetch(`${API_URL}/district-code/${selectedDistrict}`);
       if (!districtCodeResponse.ok) {
         const errorData = await districtCodeResponse.json();
         throw new Error(errorData.detail || "법정동 코드를 가져오는데 실패했습니다.");
@@ -309,7 +309,7 @@ function App() {
       setLawdCd(fetchedLawdCd); // 상태 업데이트
 
       const [minArea, maxArea] = exclusiveAreaRange;
-      const tradeResponse = await fetch(`https://rtms-streamlit.onrender.com/trade-data?lawd_cd=${fetchedLawdCd}&start_ym=${startYM}&end_ym=${endYM}${aptName ? `&apt_name=${aptName}` : ''}&min_area=${minArea}&max_area=${maxArea}`);
+      const tradeResponse = await fetch(`${API_URL}/trade-data?lawd_cd=${fetchedLawdCd}&start_ym=${startYM}&end_ym=${endYM}${aptName ? `&apt_name=${aptName}` : ''}&min_area=${minArea}&max_area=${maxArea}`);
       if (!tradeResponse.ok) {
         const errorData = await tradeResponse.json();
         throw new Error(errorData.detail || "거래 데이터 조회 실패");
@@ -319,7 +319,7 @@ function App() {
       console.log("Raw tradeDataResult:", tradeDataResult); // 디버깅용 로그 추가
 
       if (tradeDataResult.length > 0) {
-        const geocodeResponse = await fetch('https://rtms-streamlit.onrender.com/geocode-trade-history', {
+        const geocodeResponse = await fetch(`${API_URL}/geocode-trade-history`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -358,7 +358,7 @@ function App() {
     }
 
     try {
-      const response = await fetch('https://rtms-streamlit.onrender.com/forecast', {
+      const response = await fetch(`${API_URL}/forecast`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -400,7 +400,7 @@ function App() {
     }
 
     try {
-      const response = await fetch('https://rtms-streamlit.onrender.com/chat', {
+      const response = await fetch(`${API_URL}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
