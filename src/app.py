@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware # CORS 미들웨어 임포트
 from pydantic import BaseModel
 from typing import List, Dict, Optional
+import pandas as pd
 
 # main.py에서 분리된 로직과 LAWD_CODES를 임포트합니다.
 from .main import LAWD_CODES, get_trade_data, get_geocoded_data, get_forecast_data, get_chat_agent
@@ -12,11 +13,7 @@ app = FastAPI()
 origins = [
     "http://localhost",
     "http://localhost:3000", # React 앱의 주소
-    "http://127.0.0.1:3000", # 127.0.0.1을 통한 접근 허용
-    "http://localhost:5173", # 이전 React 앱의 주소
-    "http://127.0.0.1:5173", # 127.0.0.1을 통한 이전 React 앱의 주소
-    "http://localhost:5175", # 현재 React 앱의 주소
-    "http://127.0.0.1:5175", # 127.0.0.1을 통한 현재 React 앱의 주소
+    "https://roaring-pegasus-7d450e.netlify.app"
 ]
 
 app.add_middleware(
@@ -39,13 +36,6 @@ def find_code_for_district(district_name: str) -> str | None:
 @app.get("/")
 def read_root():
     return {"message": "Hello, FastAPI! 아파트 실거래가 프로젝트에 오신 것을 환영합니다."}
-
-@app.get("/lawd-codes")
-def get_all_lawd_codes() -> Dict[str, Dict[str, str]]:
-    """
-    전체 법정동 코드 데이터를 반환합니다.
-    """
-    return LAWD_CODES
 
 @app.get("/district-code/{district_name}")
 def get_district_code(district_name: str) -> Dict:
@@ -107,19 +97,19 @@ def get_apartment_forecast(request: ForecastRequest) -> Dict:
     if not request.trade_data:
         raise HTTPException(status_code=400, detail="예측을 위한 거래 데이터가 비어 있습니다.")
 
-    # get_forecast_data는 DataFrame을 기대하므로, trade_data를 DataFrame으로 변환해야 합니다.
-    # main.py의 get_forecast_data는 이미 DataFrame을 받도록 되어 있으므로,
-    # 여기서는 임시로 DataFrame으로 변환하여 전달합니다.
-    # 실제로는 main.py의 get_forecast_data가 list[dict]를 받도록 수정하거나,
-    # 여기서 pandas를 임포트하여 변환해야 합니다.
-    # 현재는 main.py에서 pandas를 임포트하고 있으므로, 여기서는 list[dict]를 바로 넘기겠습니다.
-    # (get_forecast_data 함수가 내부적으로 처리한다고 가정)
-    # -> main.py의 get_forecast_data는 df를 받으므로, 여기서 변환해야 합니다.
-    import pandas as pd # 임시로 여기에 pandas 임포트
+    # 서비스 로직(get_forecast_data)은 DataFrame을 인자로 받으므로,
+    # 요청으로 받은 list[dict]를 DataFrame으로 변환합니다.
 
     df_for_forecast = pd.DataFrame(request.trade_data)
     if df_for_forecast.empty:
         raise HTTPException(status_code=400, detail="예측을 위한 유효한 거래 데이터가 없습니다.")
+
+    # '거래일' 컬럼을 datetime 객체로 변환합니다. 이것이 누락되어 에러가 발생했습니다.
+    if '거래일' in df_for_forecast.columns:
+        df_for_forecast['거래일'] = pd.to_datetime(df_for_forecast['거래일'], errors='coerce')
+    else:
+        # '거래일' 컬럼이 없으면 예측을 수행할 수 없으므로 에러를 발생시킵니다.
+        raise HTTPException(status_code=400, detail="예측에 필요한 '거래일' 필드가 데이터에 없습니다.")
 
     hist_df, fcst_df = get_forecast_data(df_for_forecast, request.periods)
 
@@ -144,7 +134,6 @@ def chat_with_agent(request: ChatRequest) -> Dict:
     if not request.trade_data:
         raise HTTPException(status_code=400, detail="챗봇을 위한 거래 데이터가 비어 있습니다.")
 
-    import pandas as pd # 임시로 여기에 pandas 임포트
     df_for_chat = pd.DataFrame(request.trade_data)
     if df_for_chat.empty:
         raise HTTPException(status_code=400, detail="챗봇을 위한 유효한 거래 데이터가 없습니다.")

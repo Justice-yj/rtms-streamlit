@@ -156,7 +156,7 @@ function App() {
   useEffect(() => {
     const fetchLawdCodes = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:8000/lawd-codes');
+        const response = await fetch('https://rtms-streamlit.onrender.com/lawd-codes');
         if (!response.ok) {
           throw new Error('법정동 코드 데이터를 불러오는데 실패했습니다.');
         }
@@ -279,7 +279,7 @@ function App() {
 
     try {
       const [minArea, maxArea] = exclusiveAreaRange;
-      const tradeResponse = await fetch(`http://127.0.0.1:8000/trade-data?lawd_cd=${lawdCd}&start_ym=${startYM}&end_ym=${endYM}${aptName ? `&apt_name=${aptName}` : ''}&area_exclusive_min=${minArea}&area_exclusive_max=${maxArea}`);
+      const tradeResponse = await fetch(`https://rtms-streamlit.onrender.com/trade-data?lawd_cd=${lawdCd}&start_ym=${startYM}&end_ym=${endYM}${aptName ? `&apt_name=${aptName}` : ''}&area_exclusive_min=${minArea}&area_exclusive_max=${maxArea}`);
       if (!tradeResponse.ok) {
         const errorData = await tradeResponse.json();
         throw new Error(errorData.detail || "거래 데이터 조회 실패");
@@ -289,7 +289,7 @@ function App() {
       console.log("Raw tradeDataResult:", tradeDataResult); // 디버깅용 로그 추가
 
       if (tradeDataResult.length > 0) {
-        const geocodeResponse = await fetch('http://127.0.0.1:8000/geocode-trade-history', {
+        const geocodeResponse = await fetch('https://rtms-streamlit.onrender.com/geocode-trade-history', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -328,7 +328,7 @@ function App() {
     }
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/forecast', {
+      const response = await fetch('https://rtms-streamlit.onrender.com/forecast', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -370,7 +370,7 @@ function App() {
     }
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/chat', {
+      const response = await fetch('https://rtms-streamlit.onrender.com/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
