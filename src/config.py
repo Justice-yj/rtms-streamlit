@@ -36,3 +36,11 @@ ENDPOINT = (
 
 # --- 기타 공통 경로 --- (필요시 사용)
 BASE_DIR = Path(__file__).resolve().parent
+
+# --- 법정동 코드 파일 경로 ---
+# 환경 변수 `LAWD_CODE_FILE_PATH`가 있으면 그 값을 사용하고,
+# 없으면 프로젝트 루트의 '법정동코드_전체자료.csv'를 기본값으로 사용합니다.
+LAWD_CODE_FILE = os.getenv(
+    "LAWD_CODE_FILE_PATH",
+    default=str(BASE_DIR.parent / "법정동코드_전체자료.csv")
+)

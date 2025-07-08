@@ -29,22 +29,19 @@ def load_lawd_table() -> pd.DataFrame:
     # --- ① 파일 탐색 ---
     # 현재 스크립트 파일의 디렉토리를 기준으로 파일을 찾습니다.
     base_dir = Path(__file__).parent.parent
-    path = None
-    for fn in os.listdir(base_dir):
-        ext = fn.split(".")[-1].lower()
-        if fn.startswith("법정동코드") and ext in {"xlsx", "xls", "csv"}:
-            path = base_dir / fn
-            break
-    if path is None:
-        raise FileNotFoundError("⚠️ ‘법정동코드…’ 파일을 앱 폴더에 넣어 주세요!")
+    path = base_dir / "법정동코드_전체자료.csv"
+
+    if not path.exists():
+        raise FileNotFoundError(f"⚠️ '{path}' 파일을 찾을 수 없습니다!")
     print(f"DEBUG: Found file at: {path}")
 
     # --- ② 파일 읽기 ---
     # 파일 확장자에 따라 적절한 Pandas 함수로 데이터를 읽어옵니다.
-    if ext in {"xlsx", "xls"}:
+    ext = path.suffix.lower()
+    if ext in {".xlsx", ".xls"}:
         df = pd.read_excel(path, dtype=str)
     else:
-        df = pd.read_csv(path, dtype=str, encoding="euc-kr")
+        df = pd.read_csv(path, dtype=str, encoding="cp949")
     print(f"DEBUG: DataFrame head:\n{df.head()}")
 
     # --- ③ 데이터 정제 및 필터링 ---
