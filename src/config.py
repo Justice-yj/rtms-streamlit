@@ -6,8 +6,6 @@ from __future__ import annotations
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-import streamlit as st
-
 # --- .env 파일 로드 ---
 # 프로젝트 루트의 .env 파일이 존재하면 환경 변수로 로드합니다.
 load_dotenv()
@@ -17,10 +15,13 @@ SERVICE_KEY = os.getenv("RTMS_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 VWORLD_API_KEY = os.getenv("VWORLD_API_KEY")
 
-# 필수 키가 설정되지 않았으면 에러 메시지를 표시하고 앱 실행을 중지합니다.
-if not SERVICE_KEY or not OPENAI_API_KEY or not VWORLD_API_KEY:
-    st.error("🚨 환경변수 RTMS_KEY, OPENAI_API_KEY, NAVER_CLIENT_ID, NAVER_CLIENT_SECRET를 .env 파일에 설정해주세요!")
-    st.stop()
+# 필수 키가 설정되지 않았으면 에러를 발생시킵니다.
+if not SERVICE_KEY:
+    raise ValueError("환경변수 RTMS_KEY가 설정되지 않았습니다. .env 파일을 확인해주세요.")
+if not OPENAI_API_KEY:
+    raise ValueError("환경변수 OPENAI_API_KEY가 설정되지 않았습니다. .env 파일을 확인해주세요.")
+if not VWORLD_API_KEY:
+    raise ValueError("환경변수 VWORLD_API_KEY가 설정되지 않았습니다. .env 파일을 확인해주세요.")
 
 # --- 서비스 키 자동 보정 (안전장치) ---
 # .env 파일에서 마지막 '==' 문자가 누락되는 문제를 방지하기 위해,

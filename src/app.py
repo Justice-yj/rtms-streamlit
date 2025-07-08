@@ -13,6 +13,7 @@ app = FastAPI()
 origins = [
     "http://localhost",
     "http://localhost:3000", # React 앱의 주소
+    "http://localhost:5173", # 추가: Vite 개발 서버 기본 포트
     "https://roaring-pegasus-7d450e.netlify.app"
 ]
 
@@ -26,9 +27,10 @@ app.add_middleware(
 
 # LAWD_DATA는 이제 main.py에서 LAWD_CODES로 관리됩니다.
 # find_code_for_district 함수는 LAWD_CODES를 사용하도록 수정합니다.
-def find_code_for_district(district_name: str) -> str | None:
-    """전체 법정동 데이터에서 주어진 시군구 이름에 해당하는 코드를 찾습니다."""
-    for districts in LAWD_CODES.values():
+def find_code_for_district(sido_name: str, district_name: str) -> str | None:
+    """주어진 시도와 시군구 이름에 해당하는 법정동 코드를 찾습니다."""
+    if sido_name in LAWD_CODES:
+        districts = LAWD_CODES[sido_name]
         if district_name in districts:
             return districts[district_name]
     return None
@@ -51,14 +53,21 @@ def get_sgg_list_api(sido: str) -> List[str]:
     """
     return list(LAWD_CODES.get(sido, {}).keys())
 
-@app.get("/district-code/{district_name}")
-def get_district_code(district_name: str) -> Dict:
+@app.get("/lawd-codes")
+def get_lawd_codes_api() -> Dict:
     """
-    지역 이름(구 단위)을 입력받아 해당하는 법정동 코드를 반환합니다.
+    로드된 법정동 코드 데이터를 반환합니다.
     """
-    district_code = find_code_for_district(district_name)
+    return LAWD_CODES
+
+@app.get("/district-code")
+def get_district_code(sido: str, district_name: str) -> Dict:
+    """
+    시도 이름과 지역 이름(구 단위)을 입력받아 해당하는 법정동 코드를 반환합니다.
+    """
+    district_code = find_code_for_district(sido, district_name)
     if district_code:
-        return {"district_name": district_name, "district_code": district_code}
+        return {"sido": sido, "district_name": district_name, "district_code": district_code}
     raise HTTPException(status_code=404, detail="해당하는 지역을 찾을 수 없습니다.")
 
 # 새로운 /trade-data 엔드포인트 (기존 get_trade_history 대체)

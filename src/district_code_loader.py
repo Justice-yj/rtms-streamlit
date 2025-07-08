@@ -28,11 +28,26 @@ def load_lawd_table() -> pd.DataFrame:
     """
     # --- ① 파일 탐색 ---
     # 현재 스크립트 파일의 디렉토리를 기준으로 파일을 찾습니다.
-    base_dir = Path(__file__).parent.parent
-    path = base_dir / "법정동코드_전체자료.csv"
+    # 현재 스크립트 파일의 디렉토리를 기준으로 파일을 찾습니다.
+    # 프로젝트 루트 디렉토리를 찾기 위해 현재 파일의 부모 디렉토리의 부모 디렉토리를 사용합니다.
+    project_root = Path(__file__).resolve().parent.parent
+    file_name = "법정동코드_전체자료.csv"
+    path = project_root / file_name
+
+    import os
+    print(f"DEBUG: Current working directory: {os.getcwd()}")
+    print(f"DEBUG: Attempting to load file from: {path}")
+    print(f"DEBUG: Absolute path being checked: {path.resolve()}")
+    print(f"DEBUG: os.path.exists check: {os.path.exists(path)}")
 
     if not path.exists():
-        raise FileNotFoundError(f"⚠️ '{path}' 파일을 찾을 수 없습니다!")
+        # 더 자세한 오류 메시지 제공
+        raise FileNotFoundError(
+            f"⚠️ '{file_name}' 파일을 찾을 수 없습니다!\n"
+            f"예상 경로: {path.resolve()}\n"
+            f"현재 작업 디렉토리: {os.getcwd()}\n"
+            f"파일이 해당 경로에 있는지 확인해주세요."
+        )
     print(f"DEBUG: Found file at: {path}")
 
     # --- ② 파일 읽기 ---
@@ -58,7 +73,7 @@ def load_lawd_table() -> pd.DataFrame:
     # (예: '서울특별시 종로구' -> '서울특별시', '종로구')
     parts = sgg["name"].str.split()
     sgg["시도"] = parts.str[0]
-    sgg["시군구"] = parts.str[1].fillna(sgg["시도"]) # 세종특별자치시 등 단일 이름 처리
+    sgg["시군구"] = parts.str[1].where(parts.str.len() > 1, sgg["시도"]) # 세종특별자치시 등 단일 이름 처리
     print(f"DEBUG: Sido/Sigungu added:\n{sgg.head()}")
 
     # API에서 사용할 5자리 법정동 코드를 추출합니다.
@@ -82,6 +97,13 @@ def build_lawd_dict() -> Dict[str, Dict[str, str]]:
     sgg_df = load_lawd_table()
     mapping: Dict[str, Dict[str, str]] = {}
     for _, row in sgg_df.iterrows():
+        # 시/도와 시/군/구가 동일한 경우는 제외 (예: 서울특별시 - 서울특별시)
+        if row["시도"] == row["시군구"]:
+            continue
         # setdefault를 이용해 시/도 키가 없으면 빈 딕셔너리를 생성하고, 시군구와 코드를 추가
         mapping.setdefault(row["시도"], {})[row["시군구"]] = row["LAWD_CD"]
+
+    # 시군구 목록을 오름차순으로 정렬
+    for sido, sgg_dict in mapping.items():
+        mapping[sido] = dict(sorted(sgg_dict.items()))
     return mapping

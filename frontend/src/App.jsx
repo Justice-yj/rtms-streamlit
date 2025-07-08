@@ -1,31 +1,33 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
-import Box from '@mui/material/Box';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import CircularProgress from '@mui/material/CircularProgress';
-import Alert from '@mui/material/Alert';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Grid from '@mui/material/Grid';
-import Slider from '@mui/material/Slider'; // Slider import 추가
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Container,
+  Box,
+  Tabs,
+  Tab,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
+  Button,
+  CircularProgress,
+  Alert,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Grid,
+  Slider,
+  Paper,
+  useMediaQuery
+} from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import Paper from '@mui/material/Paper';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import { Map, View } from 'ol';
 import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
@@ -300,7 +302,7 @@ function App() {
 
     try {
       // 법정동 코드 가져오기
-      const districtCodeResponse = await fetch(`${API_URL}/district-code/${selectedDistrict}`);
+      const districtCodeResponse = await fetch(`${API_URL}/district-code?sido=${selectedCity}&district_name=${selectedDistrict}`);
       if (!districtCodeResponse.ok) {
         const errorData = await districtCodeResponse.json();
         throw new Error(errorData.detail || "법정동 코드를 가져오는데 실패했습니다.");
@@ -510,7 +512,7 @@ function App() {
                     fullWidth
                     variant="contained"
                     onClick={handleSearch}
-                    disabled={loading || !lawdCd}
+                    disabled={loading || !selectedCity || !selectedDistrict}
                     sx={{ height: '56px' }}
                   >
                     {loading ? <CircularProgress size={24} /> : '데이터 조회'}
