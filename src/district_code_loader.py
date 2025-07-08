@@ -6,6 +6,7 @@ from __future__ import annotations
 import os
 from functools import lru_cache
 from typing import Dict
+from pathlib import Path
 
 import pandas as pd
 
@@ -26,12 +27,13 @@ def load_lawd_table() -> pd.DataFrame:
         FileNotFoundError: '법정동코드'로 시작하는 파일이 없을 경우 발생합니다.
     """
     # --- ① 파일 탐색 ---
-    # 현재 디렉터리에서 '법정동코드'로 시작하는 CSV 또는 Excel 파일을 찾습니다.
+    # 현재 스크립트 파일의 디렉토리를 기준으로 파일을 찾습니다.
+    base_dir = Path(__file__).parent
     path = None
-    for fn in os.listdir("."):
+    for fn in os.listdir(base_dir):
         ext = fn.split(".")[-1].lower()
         if fn.startswith("법정동코드") and ext in {"xlsx", "xls", "csv"}:
-            path = fn
+            path = base_dir / fn
             break
     if path is None:
         raise FileNotFoundError("⚠️ ‘법정동코드…’ 파일을 앱 폴더에 넣어 주세요!")
