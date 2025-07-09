@@ -26,7 +26,7 @@ import {
   Paper,
   useMediaQuery
 } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import { createTheme, ThemeProvider, useTheme } from '@mui/material/styles';
 import { Map, View } from 'ol';
 import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
@@ -40,6 +40,69 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import 'ol/ol.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+// App 컴포넌트 외부에 커스텀 테마 정의
+const customTheme = createTheme({
+  palette: {
+    primary: {
+      main: '#3f51b5', // 기존 Material Blue (조금 더 차분한 색으로 변경 가능)
+      // main: '#1976d2', // 예시: 더 밝은 파랑
+      // main: '#004d40', // 예시: 짙은 녹색 계열
+    },
+    secondary: {
+      main: '#ff4081', // 예시: 강조색
+    },
+    background: {
+      default: '#f4f6f8', // 약간 회색빛이 도는 배경색
+      paper: '#ffffff', // Paper 컴포넌트 배경색
+    },
+  },
+  typography: {
+    fontFamily: [
+      'Roboto',
+      '"Helvetica Neue"',
+      'Arial',
+      'sans-serif',
+      // 한글 폰트 추가 (시스템 폰트 우선)
+      '-apple-system',
+      'BlinkMacSystemFont',
+      '"Segoe UI"',
+      '"Apple Color Emoji"',
+      '"Segoe UI Emoji"',
+      '"Segoe UI Symbol"',
+      '"Noto Sans KR"', // Noto Sans KR이 설치되어 있다면 사용
+    ].join(','),
+    h6: {
+      fontWeight: 600, // 제목 글씨를 좀 더 두껍게
+    },
+  },
+  components: {
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#2c3e50', // 어두운 네이비/회색 계열 앱바
+          // backgroundColor: '#1a237e', // 더 진한 남색
+        },
+      },
+    },
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none', // 탭 글씨 대문자 변환 방지
+          fontWeight: 600,
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)', // 부드러운 그림자
+          borderRadius: '8px', // 둥근 모서리
+        },
+      },
+    },
+  },
+});
 
 // 탭 패널 컴포넌트
 function TabPanel(props) {
@@ -427,7 +490,8 @@ function App() {
   };
 
   return (
-    <Box sx={{ flexGrow: 1, width: '100%' }}>
+    <ThemeProvider theme={customTheme}> {/* 이 부분 추가 */}
+      <Box sx={{ flexGrow: 1, width: '100%' }}>
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
