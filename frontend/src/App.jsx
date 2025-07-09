@@ -523,14 +523,14 @@ function App() {
             </Grid>
             <Grid item xs={12}> {/* 전용면적 슬라이더를 위한 새로운 Grid item */}
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={12} md={12} lg={12} sx={{ mt: 2 }}> {/* mt: 2는 상단 마진을 추가하여 간격 확보 */}
+                <Grid item xs={6} sm={6} md={6} lg={6} sx={{ mt: 2 }}> {/* mt: 2는 상단 마진을 추가하여 간격 확보 */}
                   <Typography gutterBottom>전용면적 (m²)</Typography>
                   <Slider
                     value={exclusiveAreaRange}
                     onChange={(event, newValue) => setExclusiveAreaRange(newValue)}
                     valueLabelDisplay="auto"
                     min={0}
-                    max={100}
+                    max={200}
                     step={1}
                     marks
                     disableSwap
