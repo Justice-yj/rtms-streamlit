@@ -14,7 +14,7 @@ def _vworld_geocode(address: str) -> tuple[float, float] | None:
     """
     VWorld API를 사용하여 주소를 위도, 경도로 변환합니다.
     """
-    url = "https://api.vworld.kr/req/address"
+    url = "http://api.vworld.kr/req/address"
     params = {
         "service": "address",
         "request": "getcoord",
