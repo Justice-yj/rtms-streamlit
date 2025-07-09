@@ -530,7 +530,7 @@ function App() {
                     onChange={(event, newValue) => setExclusiveAreaRange(newValue)}
                     valueLabelDisplay="auto"
                     min={0}
-                    max={200}
+                    max={100}
                     step={1}
                     marks
                     disableSwap
