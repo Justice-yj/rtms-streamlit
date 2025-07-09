@@ -14,7 +14,7 @@ origins = [
     "http://localhost",
     "http://localhost:3000", # React 앱의 주소
     "https://roaring-pegasus-7d450e.netlify.app",
-    "https://searchbudongsan.netlify.app/"
+    "https://searchbudongsan.netlify.app"
 ]
 
 app.add_middleware(

@@ -4,12 +4,10 @@ from __future__ import annotations
 from typing import Tuple
 import pandas as pd
 from prophet import Prophet
-import streamlit as st
 
 # --- Prophet 모델 학습 ---
-# @st.cache_resource를 사용해 학습된 모델 객체를 캐시하여, 동일한 데이터에 대해
-# 반복적인 학습을 피하고 앱 성능을 최적화합니다.
-@st.cache_resource(show_spinner=False)
+# @st.cache_resource는 Streamlit 전용 기능이므로 FastAPI 환경에서는 사용할 수 없습니다.
+# 우선 캐싱 없이 모델을 학습하도록 수정하여 앱이 정상 동작하도록 합니다.
 def train_prophet(ts_df: pd.DataFrame) -> Prophet:
     """
     Prophet 모델을 학습시킵니다.
