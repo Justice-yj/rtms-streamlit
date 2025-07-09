@@ -26,24 +26,16 @@ app.add_middleware(
 )
 
 # LAWD_DATA는 이제 main.py에서 LAWD_CODES로 관리됩니다.
-# find_code_for_district 함수는 LAWD_CODES를 사용하도록 수정합니다.
-def find_code_for_district(district_name: str) -> str | None:
-    """전체 법정동 데이터에서 주어진 시군구 이름에 해당하는 코드를 찾습니다."""
-    for districts in LAWD_CODES.values():
-        if district_name in districts:
-            return districts[district_name]
-    return None
-
 @app.get("/")
 def read_root():
     return {"message": "Hello, FastAPI! 아파트 실거래가 프로젝트에 오신 것을 환영합니다."}
 
-@app.get("/sido-list")
-def get_sido_list_api() -> List[str]:
+@app.get("/lawd-codes")
+def get_lawd_codes_api() -> Dict:
     """
-    전체 시/도 목록을 반환합니다.
+    전체 법정동 코드 데이터를 {시도: {시군구: 코드}} 형태로 반환합니다.
     """
-    return list(LAWD_CODES.keys())
+    return LAWD_CODES
 
 @app.get("/sgg-list/{sido}")
 def get_sgg_list_api(sido: str) -> List[str]:
@@ -52,15 +44,19 @@ def get_sgg_list_api(sido: str) -> List[str]:
     """
     return list(LAWD_CODES.get(sido, {}).keys())
 
-@app.get("/district-code/{district_name}")
-def get_district_code(district_name: str) -> Dict:
+@app.get("/district-code")
+def get_district_code(sido: str, district_name: str) -> Dict:
     """
-    지역 이름(구 단위)을 입력받아 해당하는 법정동 코드를 반환합니다.
+    주어진 시/도와 시/군/구 이름에 해당하는 법정동 코드를 반환합니다.
     """
-    district_code = find_code_for_district(district_name)
+    sido_districts = LAWD_CODES.get(sido)
+    if not sido_districts:
+        raise HTTPException(status_code=404, detail=f"'{sido}'에 해당하는 시/도를 찾을 수 없습니다.")
+
+    district_code = sido_districts.get(district_name)
     if district_code:
         return {"district_name": district_name, "district_code": district_code}
-    raise HTTPException(status_code=404, detail="해당하는 지역을 찾을 수 없습니다.")
+    raise HTTPException(status_code=404, detail=f"'{sido} {district_name}'에 해당하는 지역을 찾을 수 없습니다.")
 
 # 새로운 /trade-data 엔드포인트 (기존 get_trade_history 대체)
 @app.get("/trade-data")
