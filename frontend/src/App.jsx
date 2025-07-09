@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -39,6 +38,8 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import 'ol/ol.css';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 // 탭 패널 컴포넌트
 function TabPanel(props) {
