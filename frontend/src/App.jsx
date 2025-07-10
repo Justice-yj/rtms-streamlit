@@ -77,14 +77,6 @@ const customTheme = createTheme({
     },
   },
   components: {
-    MuiAppBar: {
-      styleOverrides: {
-        root: {
-          backgroundColor: '#2c3e50', // 어두운 네이비/회색 계열 앱바
-          // backgroundColor: '#1a237e', // 더 진한 남색
-        },
-      },
-    },
     MuiTab: {
       styleOverrides: {
         root: {

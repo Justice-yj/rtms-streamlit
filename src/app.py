@@ -13,6 +13,7 @@ app = FastAPI()
 origins = [
     "http://localhost",
     "http://localhost:3000", # React 앱의 주소
+    "http://localhost:5173", # Vite 개발 서버 주소
     "https://roaring-pegasus-7d450e.netlify.app",
     "https://searchbudongsan.netlify.app"
 ]
